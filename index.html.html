@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Куди піде зайчик? 🐰 — Казка-квест</title>
+    <style>
+        :root {
+            --bg-color: #f0f7f4;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #4CAF50;
+            --accent-hover: #45a049;
+            --btn-secondary: #ff9800;
+            --btn-secondary-hover: #f57c00;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 25%;
+            transition: width 0.4s ease;
+            border-radius: 4px;
+        }
+
+        .emoji-display {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .story-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 35px;
+            color: #334155;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:nth-child(1) {
+            background-color: #10b981;
+        }
+        .btn:nth-child(1):hover {
+            background-color: #059669;
+        }
+
+        .btn:nth-child(2) {
+            background-color: #f59e0b;
+        }
+        .btn:nth-child(2):hover {
+            background-color: #d97706;
+        }
+
+        .restart-btn {
+            background-color: #6366f1;
+            margin-top: 10px;
+        }
+        .restart-btn:hover {
+            background-color: #4f46e5;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Декоративні елементи фону */
+        .leaf {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- Шкала прогресу -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Головний контент квесту -->
+        <div id="gameContent">
+            <div class="emoji-display" id="emojiDisplay">🐰</div>
+            <div class="story-text" id="storyText">Завантаження казки...</div>
+            <div class="choices-container" id="choicesContainer">
+                <!-- Кнопки генеруються динамічно -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Дані квесту: кроки історії та розгалуження
+        const storySteps = {
+            start: {
+                progress: "25%",
+                emoji: "🐰🌲",
+                text: "Маленьке Зайченя стриб-стриб із сонячної галявини у густий чарівний ліс. Раптом попереду розійшлася стежинка. Куди ж попрямувати малюку?",
+                choices: [
+                    { text: "Піти до дзвінкого струмочка 🌊", next: "stream" },
+                    { text: "Зазирнути у старе дупло 🌳", next: "hollow" }
+                ]
+            },
+            stream: {
+                progress: "50%",
+                emoji: "🌊🐿️",
+                text: "Біля прохолодного струмочка Зайченя зустріло маленьку Білочку. Вона сумно збирала горішки і ніяк не могла знайти найсолодший.",
+                choices: [
+                    { text: "Допомогти Білочці пошукати горішки 🌰", next: "helpSquirrel" },
+                    { text: "Погратися у паперові кораблики на воді ⛵", next: "playBoats" }
+                ]
+            },
+            hollow: {
+                progress: "50%",
+                emoji: "🌳🦉",
+                text: "Зайченя обережно зазирнуло у затишне дупло, а там спав мудрий Сова. Від легкого стукоту лапок Сова прокинувся і привітно всміхнувся.",
+                choices: [
+                    { text: "Послухати цікаву казкову історію Сови 🦉", next: "listenOwl" },
+                    { text: "Запросити Сову пострибати разом на галявині ✨", next: "inviteOwl" }
+                ]
+            },
+            helpSquirrel: {
+                progress: "75%",
+                emoji: "🌰🤝",
+                text: "Зайченя швидко знайшло під кущиком великий золотистий горішок. Радісна Білочка одразу поділилася ним із новим пухнастим другом!",
+                choices: [
+                    { text: "Вирушити вдвох на велику лісову галявину 🌸", next: "finalGood" }
+                ]
+            },
+            playBoats: {
+                progress: "75%",
+                emoji: "⛵💧",
+                text: "Вони запустили чудові листочки-кораблики, які весело попливли за течією. Білочка подякувала Зайченяті за веселу компанію і запросила до друзів.",
+                choices: [
+                    { text: "Побігти на спільну галявину друзів 🌸", next: "finalGood" }
+                ]
+            },
+            listenOwl: {
+                progress: "75%",
+                emoji: "📖🌟",
+                text: "Мудрий Сова розповів дивовижну казку про нічні зірки та лісових мешканців. Зайченя дізналося багато нового і вирушило далі назустріч пригодам.",
+                choices: [
+                    { text: "Побігти до веселих лісових друзів 🌸", next: "finalGood" }
+                ]
+            },
+            inviteOwl: {
+                progress: "75%",
+                emoji: "🎉🦉",
+                text: "Сова радісно погодився і показав кілька акробатичних трюків у повітрі! Зайченя захоплено заплескало в лапки від такого дивовижного товариша.",
+                choices: [
+                    { text: "Разом рушити до лісової галявини 🌸", next: "finalGood" }
+                ]
+            },
+            finalGood: {
+                progress: "100%",
+                emoji: "💖🌲",
+                text: "На сонячній галявині зібралися всі лісові звірята! Вони влаштували веселе свято дружби, адже доброта і турбота роблять світ навколо нас справжнім дивом.",
+                choices: [
+                    { text: "Почати казку спочатку 🔄", next: "start" }
+                ]
+            }
+        };
+
+        // Функція для відображення поточного кроку квесту
+        function renderStep(stepKey) {
+            const step = storySteps[stepKey];
+            const gameContainer = document.querySelector('.game-container');
+            
+            // Анімація зміни контенту
+            gameContainer.style.opacity = '0';
+            gameContainer.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                // Оновлення прогресу, емодзі та тексту
+                document.getElementById('progressFill').style.width = step.progress;
+                document.getElementById('emojiDisplay').textContent = step.emoji;
+                document.getElementById('storyText').textContent = step.text;
+
+                // Генерація кнопок вибору
+                const choicesContainer = document.getElementById('choicesContainer');
+                choicesContainer.innerHTML = '';
+
+                step.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.className = 'btn';
+                    if (stepKey === 'finalGood') {
+                        button.classList.add('restart-btn');
+                    }
+                    button.textContent = choice.text;
+                    button.onclick = () => renderStep(choice.next);
+                    choicesContainer.appendChild(button);
+                });
+
+                // Повернення анімації видимості
+                gameContainer.style.opacity = '1';
+                gameContainer.style.transform = 'translateY(0)';
+            }, 250);
+        }
+
+        // Плавна анімація появи при завантаженні стилю
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.game-container');
+            container.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            renderStep('start');
+        });
+    </script>
+</body>
+</html>
